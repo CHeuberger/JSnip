@@ -33,7 +33,7 @@ import javax.swing.JScrollPane;
 
 public class Snipper {
     
-    public static final String VERSION = "JSnip 0.2  Carlos Heuberger";
+    public static final String VERSION = "JSnip 0.5 by Carlos Heuberger";
 
     private static final String ICON_FILE = "tray.png";
     
@@ -70,6 +70,7 @@ public class Snipper {
             closeCatchers();
             if (catcher != null) {
                 ImageDisplay display = new ImageDisplay(catcher);
+                display.setAlwaysOnTop(ontopMenuItem.getState());
                 displays.add(display);
                 display.addWindowListener(removeListener);
             }
@@ -198,7 +199,8 @@ public class Snipper {
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         for (GraphicsDevice device : environment.getScreenDevices()) {
             try {
-                catchers.add(new ImageCatcher(device, catchListener));
+                ImageCatcher catcher = new ImageCatcher(device, catchListener);
+                catchers.add(catcher);
             } catch (AWTException ex) {
                 error("creating catcher for " + device, ex);
             }
@@ -236,14 +238,17 @@ public class Snipper {
     private void doHelp(ActionEvent ev) {
         JComponent message = new JScrollPane(new JEditorPane("text/html",
                 "<html><body>\n" +
-                "<h1><center>" + VERSION + " Help</center></h1>\n" +
+                "<h1><center>" + VERSION + "</center></h1>\n" +
+                "<h1><center>Help</center></h1>\n" +
                 "<h2>Snip</h2>\n" +
                 "<tt>Right-click</tt> the tray icon for menu and select <tt>Snip</tt>;<br>\n" +
                 "or just <tt>left-click</tt> the tray icon to start a new snip.<p>\n" +
                 "<tt>Left-press</tt> and <tt>drag</tt> to select the screen region.<br>\n" +
-                "<tt>Left-press</tt> and <tt>drag</tt> again to change the region borders.<p>\n" +
-                "<tt>right-click</tt> to complete the snip - a window with thw image is created.<br>\n" +
-                "<h2>Image</h2>\n" +
+                "<tt>Left-press</tt> and <tt>drag</tt> again to adjust the region borders if needed.<p>\n" +
+                "<tt>right-click</tt> to complete the snip when ready - a window is created with the screenshot.<br>\n" +
+                "<h2>Screenshot Window</h2>\n" +
+                "<tt>Left-press</tt> and <tt>drag</tt> to move the image. <br>\n" + 
+                "<tt>Right-click</tt> for menu." +
                 "</body></html>"));
         setAlwaysOnTop(false);
         try {

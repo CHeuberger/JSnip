@@ -18,6 +18,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JWindow;
 
@@ -26,6 +28,8 @@ class ImageCatcher extends JWindow {
 
     private final GraphicsDevice device;
     private final Listener listener;
+    
+    private boolean prior18;
     
     private BufferedImage background;
     
@@ -43,6 +47,8 @@ class ImageCatcher extends JWindow {
         
         this.device = Objects.requireNonNull(device);
         this.listener = Objects.requireNonNull(listener);
+        
+        prior18 = checkVersionPrior18();
         
         capture();
         
@@ -73,13 +79,44 @@ class ImageCatcher extends JWindow {
         validate();
         setVisible(true);
     }
-
+    
+    ImageCatcher(ImageCatcher original) throws AWTException {
+        super(original.device.getDefaultConfiguration());
+        this.device = original.device;
+        this.listener = original.listener;
+        
+        this.prior18 = original.prior18;
+        
+        this.start = original.start;
+        this.end = original.end;
+        this.rectangle = original.rectangle;
+        
+        recapture();
+        dispose();
+        listener.catched(this);
+    }
+    
+    private boolean checkVersionPrior18() {
+        String version = System.getProperty("java.version");
+        Pattern pattern = Pattern.compile("(\\d++)(?:\\.(\\d++)(\\..*)?)?");
+        Matcher matcher = pattern.matcher(version);
+        if (matcher.matches()) {
+            int major = Integer.parseInt(matcher.group(1));
+            int minor = (matcher.groupCount()>1) ? Integer.parseInt(matcher.group(2)) : 0;
+            return (major < 1) || (major == 1 && minor < 8);
+        } else {
+            return false;
+        }
+    }
+    
     private void capture() throws AWTException {
         GraphicsConfiguration configuration = device.getDefaultConfiguration();
         Robot robot = new Robot(device);
         Rectangle bounds = configuration.getBounds();
-        bounds.x = 0;
-        bounds.y = 0;
+        if (prior18) {
+            bounds.x = 0;
+            bounds.y = 0;
+        }
         background = robot.createScreenCapture(bounds);
     }
 
@@ -150,9 +187,13 @@ class ImageCatcher extends JWindow {
                 int y1 = min(start.y, end.y);
                 int y2 = max(start.y, end.y);
                 if (x2 > x1 && y2 > y1) {
-                    snip(x1, y1, x2, y2);
-                    listener.catched(this);
-                    return;
+                    try {
+                        snip(x1, y1, x2, y2);
+                        listener.catched(this);
+                        return;
+                    } catch (Throwable ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
             listener.catched(null);
@@ -163,7 +204,9 @@ class ImageCatcher extends JWindow {
         if (x2 > x1 && y2 > y1) {
             Rectangle bounds = device.getDefaultConfiguration().getBounds();
             rectangle = new Rectangle(x1+bounds.x, y1+bounds.y, x2-x1, y2-y1);
-            image = background.getSubimage(x1, y1, x2-x1, y2-y1);
+            rectangle = rectangle.intersection(bounds);
+            
+            image = background.getSubimage(rectangle.x-bounds.x, rectangle.y-bounds.y, rectangle.width, rectangle.height);
             
             ImageSelection selection = new ImageSelection(image);
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();

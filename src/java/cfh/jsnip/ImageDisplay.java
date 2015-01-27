@@ -32,6 +32,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 class ImageDisplay extends JWindow {
     
     private static final String PREF_DIR = "image directory";
+    private static final String PREF_SUFFIX = "image suffix";
     private final Preferences preferences = Preferences.userNodeForPackage(getClass());
     
 
@@ -59,6 +60,7 @@ class ImageDisplay extends JWindow {
                 doBorder(ev);
             }
         });
+        borderItem.setState(border);
         JMenuItem save = new JMenuItem(new AbstractAction("Save") {
             @Override
             public void actionPerformed(ActionEvent ev) {
@@ -71,11 +73,16 @@ class ImageDisplay extends JWindow {
                 doCopy(ev);
             }
         });
-        borderItem.setState(border);
         JMenuItem recapture = new JMenuItem(new AbstractAction("Recapture") {
             @Override
             public void actionPerformed(ActionEvent ev) {
                 doRecapture(ev);
+            }
+        });
+        JMenuItem clone = new JMenuItem(new AbstractAction("Clone") {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                doClone(ev);
             }
         });
         JMenuItem close = new JMenuItem(new AbstractAction("Close") {
@@ -91,6 +98,7 @@ class ImageDisplay extends JWindow {
         popupMenu.add(copy);
         popupMenu.addSeparator();
         popupMenu.add(recapture);
+        popupMenu.add(clone);
         popupMenu.addSeparator();
         popupMenu.add(close);
         popupMenu.addPopupMenuListener(new PopupMenuListener() {
@@ -141,15 +149,30 @@ class ImageDisplay extends JWindow {
         setAlwaysOnTop(false);
         try {
             String dir = preferences.get(PREF_DIR, "");
+            String suffix = preferences.get(PREF_SUFFIX, "");
             String[] suffixes = ImageIO.getWriterFileSuffixes();
             JFileChooser chooser = new JFileChooser(dir);
+            FileNameExtensionFilter defaultFilter = null;
             for (int i = 0; i < suffixes.length; i += 1) {
-                chooser.addChoosableFileFilter(new FileNameExtensionFilter(suffixes[i], suffixes[i]));
+                FileNameExtensionFilter filter = new FileNameExtensionFilter(suffixes[i], suffixes[i]);
+                chooser.addChoosableFileFilter(filter);
+                if (suffixes[i].equalsIgnoreCase(suffix)) {
+                    defaultFilter = filter;
+                }
+            }
+            if (defaultFilter != null) {
+                chooser.setFileFilter(defaultFilter);
             }
             while (true) {
                 if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                     dir = chooser.getCurrentDirectory().getAbsolutePath();
                     preferences.put(PREF_DIR, dir);
+                    FileFilter filter = chooser.getFileFilter();
+                    String defaultExtension = null;
+                    if (filter instanceof FileNameExtensionFilter) {
+                        defaultExtension = ((FileNameExtensionFilter) filter).getExtensions()[0];
+                        preferences.put(PREF_SUFFIX, defaultExtension);
+                    }
                     File file = chooser.getSelectedFile();
                     
                     String extension = null;
@@ -169,12 +192,11 @@ class ImageDisplay extends JWindow {
                         }
                     }
                     if (extension == null) {
-                        FileFilter filter = chooser.getFileFilter();
                         if (!(filter instanceof FileNameExtensionFilter)) {
                             JOptionPane.showMessageDialog(this, "no extension", "JSnip - Error", JOptionPane.ERROR_MESSAGE);
                             continue;
                         } else {
-                            extension = ((FileNameExtensionFilter)filter).getExtensions()[0];
+                            extension = defaultExtension;
                             file = new File(file.getParentFile(), name + "." + extension);
                         }
                     }
@@ -241,6 +263,26 @@ class ImageDisplay extends JWindow {
         if (catcher.getImage() == null) {
             JOptionPane.showMessageDialog(this, "recapture failed", "JSnip - Error", JOptionPane.ERROR_MESSAGE);
             dispose();
+            return;
+        }
+        setVisible(true);
+    }
+    
+    private void doClone(ActionEvent ev) {
+        setVisible(false);
+        ImageCatcher clone;
+        try {
+            clone = new ImageCatcher(catcher);
+        } catch (AWTException ex) {
+            ex.printStackTrace();
+            String[] msg = { "clone failed", ex.getMessage() };
+            JOptionPane.showMessageDialog(this, msg, "JSnip - Error", JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+        if (clone.getImage() == null) {
+            JOptionPane.showMessageDialog(this, "clone failed", "JSnip - Error", JOptionPane.ERROR_MESSAGE);
+            clone.dispose();
             return;
         }
         setVisible(true);
