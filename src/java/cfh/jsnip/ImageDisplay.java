@@ -2,7 +2,10 @@ package cfh.jsnip;
 
 import java.awt.AWTException;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -56,6 +59,9 @@ class ImageDisplay extends JWindow {
     private JCheckBoxMenuItem borderItem;
     
     private File savedAs = null;
+    
+    private boolean showID = false;
+    
 
     ImageDisplay(ImageCatcher catcher) {
         super(catcher.getDevice().getDefaultConfiguration());
@@ -173,6 +179,10 @@ class ImageDisplay extends JWindow {
     }
     
     
+    void setShowID(boolean b) {
+        showID = b;
+        repaint();
+    }
     public int getId() {
         return id;
     }
@@ -421,6 +431,32 @@ class ImageDisplay extends JWindow {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
         g.drawImage(catcher.getImage(), border ? BORDER_X : 0, border ? BORDER_Y : 0, this);
+        
+        if (showID) {
+            Graphics2D gg = (Graphics2D) g.create();
+            try {
+                String str = Integer.toString(id);
+                gg.setFont(new Font("Monospaced", Font.BOLD, 100));
+                FontMetrics fm = gg.getFontMetrics();
+                float scW = (float) getWidth() / fm.stringWidth(str);
+                float scH = (float) getHeight() / (fm.getAscent()+fm.getDescent());
+                float scale = Math.min(scW, scH);
+                if (scale < 1) {
+                    gg.setFont(gg.getFont().deriveFont(100*scale));
+                }
+                fm = gg.getFontMetrics();
+                
+                gg.setColor(new Color(255, 255, 255, 127));
+                gg.fillRect(0, 0, getWidth(), getHeight());
+                
+                int x = (getWidth() - fm.stringWidth(str)) / 2;
+                int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+                gg.setColor(Color.RED);
+                gg.drawString(str, x, y);
+            } finally {
+                gg.dispose();
+            }
+        }
     }
     
     private static final void debug(String format, Object... args) {

@@ -299,9 +299,15 @@ public class Snipper {
         text += "</body></html>";
         JComponent message = new JScrollPane(new JEditorPane("text/html", text));
         setAlwaysOnTop(false);
+        for (ImageDisplay display : displays) {
+            display.setShowID(true);
+        }
         try {
             JOptionPane.showMessageDialog(null, message, VERSION, JOptionPane.PLAIN_MESSAGE);
         } finally {
+            for (ImageDisplay display : displays) {
+                display.setShowID(false);
+            }
             setAlwaysOnTop(ontopMenuItem.getState());
         }
     }
