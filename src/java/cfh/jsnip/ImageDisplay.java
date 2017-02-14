@@ -42,7 +42,11 @@ class ImageDisplay extends JWindow {
 
     private static final int BORDER_X = 2;
     private static final int BORDER_Y = 2;
+    
+    private static int nextID = 1;
 
+    private final int id = nextID++;
+    
     private final ImageCatcher catcher;
 
     private Point pressed;
@@ -50,6 +54,8 @@ class ImageDisplay extends JWindow {
     
     private JPopupMenu popupMenu;
     private JCheckBoxMenuItem borderItem;
+    
+    private File savedAs = null;
 
     ImageDisplay(ImageCatcher catcher) {
         super(catcher.getDevice().getDefaultConfiguration());
@@ -165,8 +171,28 @@ class ImageDisplay extends JWindow {
         validate();
         setVisible(true);
     }
-
-
+    
+    
+    public int getId() {
+        return id;
+    }
+    
+    public File getSavedAs() {
+        return savedAs;
+    }
+    
+    public ImageCatcher getCatcher() {
+        return catcher;
+    }
+    
+    public int getImageHeight() {
+        return catcher.getImage().getHeight();
+    }
+    
+    public int getImageWidth() {
+        return catcher.getImage().getWidth();
+    }
+    
     private void doSave(ActionEvent ev) {
         boolean alwaysOnTop = isAlwaysOnTop();
         setAlwaysOnTop(false);
@@ -230,6 +256,7 @@ class ImageDisplay extends JWindow {
                     try {
                         if (!ImageIO.write(catcher.getImage(), extension, file))
                             throw new IOException("no writer for image format \"" + extension + "\"");
+                        savedAs = file;
                     } catch (IOException ex) {
                         ex.printStackTrace();
                         String[] msg = { ex.getMessage(), "writing " + file };

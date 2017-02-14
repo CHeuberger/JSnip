@@ -46,6 +46,8 @@ class ImageCatcher extends JWindow {
         }
     };
 
+    private final ImageCatcher original;
+    
     private final GraphicsDevice device;
     private final Listener listener;
     
@@ -65,6 +67,7 @@ class ImageCatcher extends JWindow {
     ImageCatcher(GraphicsDevice device, Listener listener) throws AWTException {
         super(device.getDefaultConfiguration());
         
+        this.original = null;
         this.device = Objects.requireNonNull(device);
         this.listener = Objects.requireNonNull(listener);
         
@@ -102,6 +105,8 @@ class ImageCatcher extends JWindow {
     
     ImageCatcher(ImageCatcher original) throws AWTException {
         super(original.device.getDefaultConfiguration());
+        
+        this.original = original;
         this.device = original.device;
         this.listener = original.listener;
         
@@ -245,6 +250,10 @@ class ImageCatcher extends JWindow {
             default: throw new IllegalArgumentException("unknown button " + button);
         }
         return (ev.getModifiers() & mask) != 0;
+    }
+    
+    public ImageCatcher getOriginal() {
+        return original;
     }
     
     public void recapture() throws AWTException {

@@ -7,6 +7,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
+import java.awt.Rectangle;
 import java.awt.SplashScreen;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
@@ -19,6 +20,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ import javax.swing.JScrollPane;
 
 public class Snipper {
     
-    public static final String VERSION = "JSnip 0.6 by Carlos Heuberger";
+    public static final String VERSION = "JSnip 0.7 by Carlos Heuberger";
 
     private static final String ICON_FILE = "tray.png";
     
@@ -170,7 +172,10 @@ public class Snipper {
         popup.add(helpMenuItem);
         popup.add(quitMenuItem);
         
-        trayIcon = new TrayIcon(trayImage, VERSION, popup);
+        String tooltip = VERSION 
+                + "\nleft-click to take snapshot"
+                + "\nright-click for menu";
+        trayIcon = new TrayIcon(trayImage, tooltip, popup);
         trayIcon.setImageAutoSize(true);
         trayIcon.addMouseListener(new MouseAdapter() {
             @Override
@@ -208,7 +213,6 @@ public class Snipper {
     }
     
     private void doOnTop(ItemEvent ev) {
-        System.out.println("on top");
         setAlwaysOnTop(ontopMenuItem.getState());
     }
     
@@ -236,20 +240,64 @@ public class Snipper {
     }
     
     private void doHelp(ActionEvent ev) {
-        JComponent message = new JScrollPane(new JEditorPane("text/html",
-                "<html><body>\n" +
-                "<h1><center>" + VERSION + "</center></h1>\n" +
-                "<h1><center>Help</center></h1>\n" +
-                "<h2>Snip</h2>\n" +
-                "<tt>Right-click</tt> the tray icon for menu and select <tt>Snip</tt>;<br>\n" +
-                "or just <tt>left-click</tt> the tray icon to start a new snip.<p>\n" +
-                "<tt>Left-press</tt> and <tt>drag</tt> to select the screen region.<br>\n" +
-                "<tt>Left-press</tt> and <tt>drag</tt> again to adjust the region borders if needed.<p>\n" +
-                "<tt>right-click</tt> to complete the snip when ready - a window is created with the screenshot.<br>\n" +
-                "<h2>Screenshot Window</h2>\n" +
-                "<tt>Left-press</tt> and <tt>drag</tt> to move the image. <br>\n" + 
-                "<tt>Right-click</tt> for menu." +
-                "</body></html>"));
+        String text = "<html><body>\n"
+                + "<h1><center>" + VERSION + "</center></h1>\n"
+                + "<h1><center>Help</center></h1>\n"
+                + "<h2>Snip</h2>\n"
+                + "<tt>Right-click</tt> the tray icon for menu and select <tt>Snip</tt>;<br>\n"
+                + "or just <tt>left-click</tt> the tray icon to start a new snip.<p>\n"
+                + "<tt>Left-press</tt> and <tt>drag</tt> to select the screen region.<br>\n"
+                + "<tt>Left-press</tt> and <tt>drag</tt> again to adjust the region borders if needed.<p>\n"
+                + "<tt>right-click</tt> to complete the snip when ready; a window will be created with the screenshot.<br>\n"
+                + "<h2>Screenshot Window</h2>\n"
+                + "<tt>Left-press</tt> and <tt>drag</tt> to move the image. <br>\n"
+                + "<tt>Right-click</tt> for menu.<br>\n";
+        if (!displays.isEmpty()) {
+            text += "<h2>Images</h2>\n"
+                + "<table border=\"1\">\n"
+                + "<tr>\n"
+                + "  <th>ID</th>\n"
+                + "  <th>Current<br>Postion</th>\n"
+                + "  <th>Image<br>Size</th>\n"
+                + "  <th>Snip<br>from</th>\n"
+                + "  <th>Snip<br>to</th>\n"
+                + "  <th>Saved as</th>\n"
+                + "  <th>Original</th>\n"
+                + "</tr>\n";
+            for (ImageDisplay display : displays) {
+                Rectangle r = display.getCatcher().getRectangle();
+                File saved = display.getSavedAs();
+                ImageCatcher original = display.getCatcher().getOriginal();
+                ImageDisplay copy = null;
+                if (original != null) {
+                    for (ImageDisplay d : displays) {
+                        if (original == d.getCatcher()) {
+                            copy = d;
+                            break;
+                        }
+                    }
+                }
+                text += String.format("<tr>\n"
+                        + "  <td>%d</td>\n"
+                        + "  <td>%d,%d</td>\n"
+                        + "  <td>%dx%d</td>\n"
+                        + "  <td>%d,%d</td>\n"
+                        + "  <td>%d,%d</td>\n"
+                        + "  <td>%s</td>\n"
+                        + "  <td>%s</td>\n"
+                        + "</tr>\n",
+                        display.getId(),
+                        display.getLocationOnScreen().x, display.getLocationOnScreen().y,
+                        display.getImageWidth(), display.getImageHeight(), 
+                        r.x, r.y, 
+                        r.x + r.width, r.y + r.height,
+                        saved == null ? "" : saved.getAbsolutePath(),
+                        copy == null ? "" : copy.getId());
+            }
+            text += "</table>\n";
+        }
+        text += "</body></html>";
+        JComponent message = new JScrollPane(new JEditorPane("text/html", text));
         setAlwaysOnTop(false);
         try {
             JOptionPane.showMessageDialog(null, message, VERSION, JOptionPane.PLAIN_MESSAGE);
@@ -275,7 +323,6 @@ public class Snipper {
         for (ImageDisplay display : displays) {
             display.setAlwaysOnTop(alwaysOnTop);
         }
-        System.out.println(alwaysOnTop);
     }
     
     private void closeCatchers() {
