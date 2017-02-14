@@ -17,6 +17,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +25,26 @@ import java.util.regex.Pattern;
 import javax.swing.JWindow;
 
 
+@SuppressWarnings("serial")
 class ImageCatcher extends JWindow {
+    
+    public static enum DiffMode { 
+        BLACK_WHITE ("Black on white"),
+        WHITE_BLACK ("White on black"),
+        GRAY_WHITE ("Gray on white"),
+        GRAY_BLACK ("Gray on black"),
+        SUB_BLACK ("Subtract on black"),
+        SUB_WHITE ("Subtract on white"),
+        MIXED ("Mixed"),
+        ;
+        private final String name;
+        DiffMode(String name) {
+            this.name = name;
+        }
+        String getName() {
+            return name;
+        }
+    };
 
     private final GraphicsDevice device;
     private final Listener listener;
@@ -236,6 +256,108 @@ class ImageCatcher extends JWindow {
         int x2 = x1 + rectangle.width;
         int y2 = y1 + rectangle.height;
         snip(x1, y1, x2, y2);
+    }
+    
+    public void diff(BufferedImage original, DiffMode mode) {
+        assert original.getWidth() == image.getWidth() : original.getWidth() + " <> " + image.getWidth();
+        assert original.getHeight() == image.getHeight() : original.getHeight() + " <> " + image.getHeight();
+        
+        ColorModel cm = ColorModel.getRGBdefault();
+        switch (mode) {
+            case BLACK_WHITE: 
+            case WHITE_BLACK: {
+                for (int y = 0; y < image.getHeight(); y += 1) {
+                    for (int x = 0; x < image.getWidth(); x += 1) {
+                        int o = original.getRGB(x, y);
+                        int i = image.getRGB(x, y);
+                        image.setRGB(x, y, (o == i ^ mode == DiffMode.WHITE_BLACK) ? 0x00ffffff : 0);
+                    }
+                }
+                break;
+            }
+            case GRAY_WHITE: {
+                int[] o = new int[cm.getNumComponents()];
+                int[] i = new int[cm.getNumComponents()];
+                for (int y = 0; y < image.getHeight(); y += 1) {
+                    for (int x = 0; x < image.getWidth(); x += 1) {
+                        o = cm.getComponents(original.getRGB(x, y), o, 0);
+                        i = cm.getComponents(image.getRGB(x, y), i , 0);
+                        double dist = 0.0;
+                        for (int j = 0; j < cm.getNumColorComponents(); j++) {
+                            int d = i[j] - o[j];
+                            dist += d*d;
+                        }
+                        int n = max(0, min(255, 255 - (int) sqrt(dist)));
+                        image.setRGB(x, y, 0x00010101 * n);
+                    }
+                }
+                break;
+            }
+            case GRAY_BLACK: {
+                int[] o = new int[cm.getNumComponents()];
+                int[] i = new int[cm.getNumComponents()];
+                for (int y = 0; y < image.getHeight(); y += 1) {
+                    for (int x = 0; x < image.getWidth(); x += 1) {
+                        o = cm.getComponents(original.getRGB(x, y), o, 0);
+                        i = cm.getComponents(image.getRGB(x, y), i , 0);
+                        double dist = 0.0;
+                        for (int j = 0; j < cm.getNumColorComponents(); j++) {
+                            int d = i[j] - o[j];
+                            dist += d*d;
+                        }
+                        int n = max(0, min(255, (int) sqrt(dist)));
+                        image.setRGB(x, y, 0x00010101 * n);
+                    }
+                }
+                break;
+            }
+            case MIXED: {
+                int[] o = new int[cm.getNumComponents()];
+                int[] i = new int[cm.getNumComponents()];
+                for (int y = 0; y < image.getHeight(); y += 1) {
+                    for (int x = 0; x < image.getWidth(); x += 1) {
+                        o = cm.getComponents(original.getRGB(x, y), o, 0);
+                        i = cm.getComponents(image.getRGB(x, y), i , 0);
+                        for (int j = 0; j < cm.getNumColorComponents(); j++) {
+                            i[j] = (i[j] + o[j]) / 2;
+                        }
+                        image.setRGB(x, y, cm.getDataElement(i, 0));
+                    }
+                }
+                break;
+            }
+            case SUB_BLACK: {
+                int[] o = new int[cm.getNumComponents()];
+                int[] i = new int[cm.getNumComponents()];
+                for (int y = 0; y < image.getHeight(); y += 1) {
+                    for (int x = 0; x < image.getWidth(); x += 1) {
+                        o = cm.getComponents(original.getRGB(x, y), o, 0);
+                        i = cm.getComponents(image.getRGB(x, y), i , 0);
+                        for (int j = 0; j < cm.getNumColorComponents(); j++) {
+                            i[j] = abs(i[j]-o[j]);
+                        }
+                        image.setRGB(x, y, cm.getDataElement(i, 0));
+                    }
+                }
+                break;
+            }
+            case SUB_WHITE: {
+                int[] o = new int[cm.getNumComponents()];
+                int[] i = new int[cm.getNumComponents()];
+                for (int y = 0; y < image.getHeight(); y += 1) {
+                    for (int x = 0; x < image.getWidth(); x += 1) {
+                        o = cm.getComponents(original.getRGB(x, y), o, 0);
+                        i = cm.getComponents(image.getRGB(x, y), i , 0);
+                        for (int j = 0; j < cm.getNumColorComponents(); j++) {
+                            i[j] = 255 - abs(i[j]-o[j]);
+                        }
+                        image.setRGB(x, y, cm.getDataElement(i, 0));
+                    }
+                }
+                break;
+            }
+            default: throw new IllegalArgumentException("unrecognized mode: " + mode);
+        }
     }
     
     public GraphicsDevice getDevice() {

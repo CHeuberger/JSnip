@@ -33,7 +33,7 @@ import javax.swing.JScrollPane;
 
 public class Snipper {
     
-    public static final String VERSION = "JSnip 0.5 by Carlos Heuberger";
+    public static final String VERSION = "JSnip 0.6 by Carlos Heuberger";
 
     private static final String ICON_FILE = "tray.png";
     

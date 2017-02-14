@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -28,7 +29,10 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import cfh.jsnip.ImageCatcher.DiffMode;
 
+
+@SuppressWarnings("serial")
 class ImageDisplay extends JWindow {
     
     private static final String PREF_DIR = "image directory";
@@ -85,6 +89,23 @@ class ImageDisplay extends JWindow {
                 doClone(ev);
             }
         });
+        JMenu diff = new JMenu("Compare");
+        for (DiffMode mode : DiffMode.values()) {
+            final DiffMode finalMode = mode;
+            JMenuItem item = new JMenuItem(new AbstractAction(mode.getName()) {
+                @Override
+                public void actionPerformed(ActionEvent ev) {
+                    doDiff(ev, finalMode);
+                }
+            });
+            diff.add(item);
+        }
+//        JMenuItem scan = new JMenuItem(new AbstractAction("Scan") {
+//            @Override
+//            public void actionPerformed(ActionEvent ev) {
+//                doScan(ev);
+//            }
+//        });
         JMenuItem close = new JMenuItem(new AbstractAction("Close") {
             @Override
             public void actionPerformed(ActionEvent ev) {
@@ -99,6 +120,8 @@ class ImageDisplay extends JWindow {
         popupMenu.addSeparator();
         popupMenu.add(recapture);
         popupMenu.add(clone);
+        popupMenu.add(diff);
+//        popupMenu.add(scan);
         popupMenu.addSeparator();
         popupMenu.add(close);
         popupMenu.addPopupMenuListener(new PopupMenuListener() {
@@ -222,9 +245,9 @@ class ImageDisplay extends JWindow {
     }
 
     private void doCopy(ActionEvent ev) {
-        ImageSelection selection = new ImageSelection(catcher.getImage());
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         if (clipboard != null) {
+            ImageSelection selection = new ImageSelection(catcher.getImage());
             clipboard.setContents(selection, selection);
         }
     }
@@ -269,24 +292,71 @@ class ImageDisplay extends JWindow {
     }
     
     private void doClone(ActionEvent ev) {
-        setVisible(false);
         ImageCatcher clone;
+        setVisible(false);
         try {
             clone = new ImageCatcher(catcher);
         } catch (AWTException ex) {
             ex.printStackTrace();
             String[] msg = { "clone failed", ex.getMessage() };
             JOptionPane.showMessageDialog(this, msg, "JSnip - Error", JOptionPane.ERROR_MESSAGE);
-            dispose();
             return;
+        } finally {
+            setVisible(true);
         }
         if (clone.getImage() == null) {
             JOptionPane.showMessageDialog(this, "clone failed", "JSnip - Error", JOptionPane.ERROR_MESSAGE);
             clone.dispose();
             return;
         }
-        setVisible(true);
     }
+    
+    private void doDiff(ActionEvent ev, DiffMode mode) {
+        ImageCatcher copy;
+        setVisible(false);
+        try {
+            copy = new ImageCatcher(catcher);
+        } catch (AWTException ex) {
+            ex.printStackTrace();
+            String[] msg = { "diff failed", ex.getMessage() };
+            JOptionPane.showMessageDialog(this, msg, "JSnip - Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        } finally {
+            setVisible(true);
+        }
+        if (copy.getImage() == null) {
+            JOptionPane.showMessageDialog(this, "diff failed", "JSnip - Error", JOptionPane.ERROR_MESSAGE);
+            copy.dispose();
+            return;
+        }
+        copy.diff(catcher.getImage(), mode);
+    }
+    
+//    private void doScan(ActionEvent ev) {
+//        LuminanceSource source = new BufferedImageLuminanceSource(catcher.getImage());
+//        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+//        Reader reader = new MultiFormatReader();
+//        
+//        boolean alwaysTop = isAlwaysOnTop();
+//        setAlwaysOnTop(false);
+//        try {
+//            Result result = reader.decode(bitmap);
+//            Object[] message = { "Barcode: ", result, "Copy to clipboard?" };
+//            int opt = JOptionPane.showConfirmDialog(this,  message, "JSnip - Barcode", JOptionPane.YES_NO_OPTION);
+//            if (opt == JOptionPane.YES_OPTION) {
+//                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+//                if (clipboard != null) {
+//                    StringSelection selection = new StringSelection(result.getText());
+//                    clipboard.setContents(selection, selection);
+//                }
+//            }
+//        } catch (NotFoundException | ChecksumException | FormatException ex) {
+//            JOptionPane.showMessageDialog(this, ex, "JSnip - Error", JOptionPane.ERROR_MESSAGE);
+//        } finally {
+//            setAlwaysOnTop(alwaysTop);
+//        }
+//
+//    }
     
     private void doClose(ActionEvent ev) {
         dispose();
