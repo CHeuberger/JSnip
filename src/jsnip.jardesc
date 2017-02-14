@@ -11,10 +11,11 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
-        <file path="/JSnip/.classpath"/>
         <folder path="/JSnip/src"/>
+        <file path="/JSnip/.classpath"/>
         <file path="/JSnip/.project"/>
-        <folder path="/JSnip/bin"/>
         <javaElement handleIdentifier="=JSnip/src\/java"/>
+        <folder path="/JSnip/bin"/>
+        <file path="/JSnip/readme.txt"/>
     </selectedElements>
 </jardesc>

@@ -446,7 +446,7 @@ class ImageDisplay extends JWindow {
                 }
                 fm = gg.getFontMetrics();
                 
-                gg.setColor(new Color(255, 255, 255, 127));
+                gg.setColor(new Color(255, 255, 255, 180));
                 gg.fillRect(0, 0, getWidth(), getHeight());
                 
                 int x = (getWidth() - fm.stringWidth(str)) / 2;
