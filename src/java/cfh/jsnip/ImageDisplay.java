@@ -54,6 +54,7 @@ class ImageDisplay extends JWindow {
 
     private Point pressed;
     private boolean border = true;
+    private Color borderColor;
     
     private JPopupMenu popupMenu;
     private JCheckBoxMenuItem borderItem;
@@ -63,11 +64,12 @@ class ImageDisplay extends JWindow {
     private boolean showID = false;
     
 
-    ImageDisplay(ImageCatcher catcher) {
+    ImageDisplay(ImageCatcher catcher, Color borderColor) {
         super(catcher.getDevice().getDefaultConfiguration());
 
         this.catcher = Objects.requireNonNull(catcher);
         Objects.requireNonNull(catcher.getImage());
+        this.borderColor = Objects.requireNonNull(borderColor);
 
         // TODO crop
         borderItem = new JCheckBoxMenuItem(new AbstractAction("Border") {
@@ -428,7 +430,7 @@ class ImageDisplay extends JWindow {
     
     @Override
     public void paint(Graphics g) {
-        g.setColor(catcher.getBorderColor());
+        g.setColor(borderColor);
         g.fillRect(0, 0, getWidth(), getHeight());
         g.drawImage(catcher.getImage(), border ? BORDER_X : 0, border ? BORDER_Y : 0, this);
         

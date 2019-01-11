@@ -31,11 +31,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 
 public class Snipper {
@@ -80,7 +77,7 @@ public class Snipper {
         public void catched(ImageCatcher catcher) {
             closeCatchers();
             if (catcher != null) {
-                ImageDisplay display = new ImageDisplay(catcher);
+                ImageDisplay display = new ImageDisplay(catcher, borderColor);
                 display.setAlwaysOnTop(ontopMenuItem.getState());
                 displays.add(display);
                 display.addWindowListener(removeListener);
@@ -159,18 +156,7 @@ public class Snipper {
         chooseColorMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ev) {
-                final JColorChooser colorChooser = new JColorChooser(borderColor);
-                JFrame tFrame = new JFrame("Colors");
-                tFrame.getContentPane().add(colorChooser);
-                tFrame.pack();
-                tFrame.setVisible(true);
-                colorChooser.getSelectionModel().addChangeListener(new ChangeListener() {
-                  @Override
-                public void stateChanged(ChangeEvent e) {
-                      borderColor = colorChooser.getColor();
-                  }
-                });
-
+                doChooseColor(ev);
             }
         });
 
@@ -178,7 +164,7 @@ public class Snipper {
         chooseRedColorMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ev) {
-                borderColor = Color.RED;
+                doChooseRedColor(ev);
             }
         });
         
@@ -243,7 +229,7 @@ public class Snipper {
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         for (GraphicsDevice device : environment.getScreenDevices()) {
             try {
-                ImageCatcher catcher = new ImageCatcher(device, catchListener, borderColor);
+                ImageCatcher catcher = new ImageCatcher(device, catchListener);
                 catchers.add(catcher);
             } catch (AWTException ex) {
                 error("creating catcher for " + device, ex);
@@ -276,6 +262,18 @@ public class Snipper {
         } finally {
             setAlwaysOnTop(ontopMenuItem.getState());
         }
+    }
+    
+    private void doChooseColor(ActionEvent ev) {
+        final JColorChooser colorChooser = new JColorChooser(borderColor);
+        int opt = JOptionPane.showConfirmDialog(null, colorChooser, "Border Color", JOptionPane.OK_CANCEL_OPTION);
+        if (opt == JOptionPane.OK_OPTION) {
+            borderColor = colorChooser.getColor();
+        }
+    }
+    
+    private void doChooseRedColor(ActionEvent ev) {
+        borderColor = Color.RED;
     }
     
     private void doHelp(ActionEvent ev) {

@@ -50,7 +50,6 @@ class ImageCatcher extends JWindow {
     
     private final GraphicsDevice device;
     private final Listener listener;
-    private final Color borderColor;
     
     private boolean prior18;
     
@@ -65,13 +64,12 @@ class ImageCatcher extends JWindow {
     private Rectangle rectangle;
     private BufferedImage image;
 
-    ImageCatcher(GraphicsDevice device, Listener listener, Color borderColor) throws AWTException {
+    ImageCatcher(GraphicsDevice device, Listener listener) throws AWTException {
         super(device.getDefaultConfiguration());
         
         this.original = null;
         this.device = Objects.requireNonNull(device);
         this.listener = Objects.requireNonNull(listener);
-        this.borderColor = Objects.requireNonNull(borderColor);
         
         prior18 = checkVersionPrior18();
         
@@ -111,7 +109,6 @@ class ImageCatcher extends JWindow {
         this.original = original;
         this.device = original.device;
         this.listener = original.listener;
-        this.borderColor = original.borderColor;
         
         this.prior18 = original.prior18;
         
@@ -384,10 +381,6 @@ class ImageCatcher extends JWindow {
         return rectangle;
     }
     
-    public Color getBorderColor() {
-        return borderColor;
-    }
-
     @Override
     public void paint(Graphics g) {
         if (background != null) {
