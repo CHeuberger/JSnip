@@ -428,7 +428,7 @@ class ImageDisplay extends JWindow {
     
     @Override
     public void paint(Graphics g) {
-        g.setColor(Color.BLACK);
+        g.setColor(catcher.getBorderColor());
         g.fillRect(0, 0, getWidth(), getHeight());
         g.drawImage(catcher.getImage(), border ? BORDER_X : 0, border ? BORDER_Y : 0, this);
         

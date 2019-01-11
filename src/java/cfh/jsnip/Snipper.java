@@ -3,6 +3,7 @@ package cfh.jsnip;
 import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.MenuItem;
@@ -27,15 +28,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 public class Snipper {
     
-    public static final String VERSION = "JSnip 0.7 by Carlos Heuberger";
+    public static final String VERSION = "JSnip 0.8 by Carlos Heuberger";
 
     private static final String ICON_FILE = "tray.png";
     
@@ -57,11 +62,15 @@ public class Snipper {
     private MenuItem snipMenuItem;
     private CheckboxMenuItem ontopMenuItem;
     private CheckboxMenuItem hideMenuItem;
+    private MenuItem chooseRedColorMenuItem;
+    private MenuItem chooseColorMenuItem;
     private MenuItem clearMenuItem;
     private MenuItem helpMenuItem;
     private MenuItem quitMenuItem;
     
     private TrayIcon trayIcon;
+    
+    private Color borderColor = Color.BLACK;
     
     private final List<ImageCatcher> catchers = new ArrayList<>();
     private final List<ImageDisplay> displays = new ArrayList<>();
@@ -146,6 +155,33 @@ public class Snipper {
             }
         });
         
+        chooseColorMenuItem = new MenuItem("Choose Color");
+        chooseColorMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                final JColorChooser colorChooser = new JColorChooser(borderColor);
+                JFrame tFrame = new JFrame("Colors");
+                tFrame.getContentPane().add(colorChooser);
+                tFrame.pack();
+                tFrame.setVisible(true);
+                colorChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+                  @Override
+                public void stateChanged(ChangeEvent e) {
+                      borderColor = colorChooser.getColor();
+                  }
+                });
+
+            }
+        });
+
+        chooseRedColorMenuItem = new MenuItem("Choose Red");
+        chooseRedColorMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                borderColor = Color.RED;
+            }
+        });
+        
         helpMenuItem = new MenuItem("Help");
         helpMenuItem.addActionListener(new ActionListener() {
             @Override
@@ -168,6 +204,9 @@ public class Snipper {
         popup.add(ontopMenuItem);
         popup.add(hideMenuItem);
         popup.add(clearMenuItem);
+        popup.addSeparator();
+        popup.add(chooseColorMenuItem);
+        popup.add(chooseRedColorMenuItem);
         popup.addSeparator();
         popup.add(helpMenuItem);
         popup.add(quitMenuItem);
@@ -204,7 +243,7 @@ public class Snipper {
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         for (GraphicsDevice device : environment.getScreenDevices()) {
             try {
-                ImageCatcher catcher = new ImageCatcher(device, catchListener);
+                ImageCatcher catcher = new ImageCatcher(device, catchListener, borderColor);
                 catchers.add(catcher);
             } catch (AWTException ex) {
                 error("creating catcher for " + device, ex);
