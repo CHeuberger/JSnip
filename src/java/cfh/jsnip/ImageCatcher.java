@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import javax.swing.JWindow;
 
 
+@SuppressWarnings("serial")
 class ImageCatcher extends JWindow {
 
     private final GraphicsDevice device;
@@ -41,6 +42,8 @@ class ImageCatcher extends JWindow {
     
     private Rectangle rectangle;
     private BufferedImage image;
+
+    Color currentColor = Color.BLACK;
 
     ImageCatcher(GraphicsDevice device, Listener listener) throws AWTException {
         super(device.getDefaultConfiguration());
@@ -249,6 +252,11 @@ class ImageCatcher extends JWindow {
     public Rectangle getRectangle() {
         return rectangle;
     }
+
+    public void setCurrentColor(Color pCurrentColor) {
+        currentColor = pCurrentColor;
+    }
+
 
     @Override
     public void paint(Graphics g) {

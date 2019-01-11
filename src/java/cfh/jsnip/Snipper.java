@@ -3,6 +3,7 @@ package cfh.jsnip;
 import java.awt.AWTEvent;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.MenuItem;
@@ -25,15 +26,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 public class Snipper {
     
-    public static final String VERSION = "JSnip 0.5 by Carlos Heuberger";
+    public static final String VERSION = "JSnip 0.5a by Carlos Heuberger";
 
     private static final String ICON_FILE = "tray.png";
     
@@ -58,9 +63,13 @@ public class Snipper {
     private MenuItem clearMenuItem;
     private MenuItem helpMenuItem;
     private MenuItem quitMenuItem;
-    
+    private MenuItem chooseColorMenuItem;
+    private MenuItem chooseRedColorMenuItem;
+
     private TrayIcon trayIcon;
-    
+
+    private Color currentColor = Color.BLACK;
+
     private final List<ImageCatcher> catchers = new ArrayList<>();
     private final List<ImageDisplay> displays = new ArrayList<>();
     
@@ -69,7 +78,7 @@ public class Snipper {
         public void catched(ImageCatcher catcher) {
             closeCatchers();
             if (catcher != null) {
-                ImageDisplay display = new ImageDisplay(catcher);
+                ImageDisplay display = new ImageDisplay(catcher,currentColor);
                 display.setAlwaysOnTop(ontopMenuItem.getState());
                 displays.add(display);
                 display.addWindowListener(removeListener);
@@ -159,13 +168,43 @@ public class Snipper {
                 doQuit(ev);
             }
         });
-        
+
+        chooseColorMenuItem = new MenuItem("Choose Color");
+        chooseColorMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                final JColorChooser colorChooser = new JColorChooser(currentColor);
+                JFrame tFrame = new JFrame("Colors");
+                tFrame.getContentPane().add(colorChooser);
+                tFrame.pack();
+                tFrame.setVisible(true);
+                colorChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+                  @Override
+                public void stateChanged(ChangeEvent e) {
+                      setCurrentColor(colorChooser.getColor());
+                  }
+                });
+
+            }
+        });
+
+        chooseRedColorMenuItem = new MenuItem("Choose Red");
+        chooseRedColorMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                setCurrentColor(Color.RED);
+            }
+        });
+
         popup = new PopupMenu();
         popup.add(snipMenuItem);
         popup.addSeparator();
         popup.add(ontopMenuItem);
         popup.add(hideMenuItem);
         popup.add(clearMenuItem);
+        popup.addSeparator();
+        popup.add(chooseColorMenuItem);
+        popup.add(chooseRedColorMenuItem);
         popup.addSeparator();
         popup.add(helpMenuItem);
         popup.add(quitMenuItem);
@@ -185,6 +224,13 @@ public class Snipper {
         } catch (AWTException ex) {
             error("Tray Icon", ex);
             return;
+        }
+    }
+
+    private void setCurrentColor(Color pColor) {
+        currentColor = pColor;
+        for (ImageCatcher tCatcher : catchers) {
+            tCatcher.setCurrentColor(pColor);
         }
     }
 

@@ -29,6 +29,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 
+@SuppressWarnings("serial")
 class ImageDisplay extends JWindow {
     
     private static final String PREF_DIR = "image directory";
@@ -46,9 +47,11 @@ class ImageDisplay extends JWindow {
     
     private JPopupMenu popupMenu;
     private JCheckBoxMenuItem borderItem;
+    private Color color;
 
-    ImageDisplay(ImageCatcher catcher) {
+    ImageDisplay(ImageCatcher catcher, final Color pColor) {
         super(catcher.getDevice().getDefaultConfiguration());
+        color = pColor;
 
         this.catcher = Objects.requireNonNull(catcher);
         Objects.requireNonNull(catcher.getImage());
@@ -321,7 +324,7 @@ class ImageDisplay extends JWindow {
     
     @Override
     public void paint(Graphics g) {
-        g.setColor(Color.BLACK);
+        g.setColor(color);
         g.fillRect(0, 0, getWidth(), getHeight());
         g.drawImage(catcher.getImage(), border ? BORDER_X : 0, border ? BORDER_Y : 0, this);
     }
