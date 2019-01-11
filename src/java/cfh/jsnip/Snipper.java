@@ -265,7 +265,7 @@ public class Snipper {
     }
     
     private void doChooseColor(ActionEvent ev) {
-        final JColorChooser colorChooser = new JColorChooser(borderColor);
+        JColorChooser colorChooser = new JColorChooser(borderColor);
         int opt = JOptionPane.showConfirmDialog(null, colorChooser, "Border Color", JOptionPane.OK_CANCEL_OPTION);
         if (opt == JOptionPane.OK_OPTION) {
             borderColor = colorChooser.getColor();

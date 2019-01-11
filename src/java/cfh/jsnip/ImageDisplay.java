@@ -21,12 +21,15 @@ import java.util.prefs.Preferences;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JWindow;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileFilter;
@@ -72,13 +75,41 @@ class ImageDisplay extends JWindow {
         this.borderColor = Objects.requireNonNull(borderColor);
 
         // TODO crop
-        borderItem = new JCheckBoxMenuItem(new AbstractAction("Border") {
+        
+        borderItem = new JCheckBoxMenuItem(new AbstractAction("Show") {
             @Override
             public void actionPerformed(ActionEvent ev) {
                 doBorder(ev);
             }
         });
         borderItem.setState(border);
+        JMenuItem chooseColor = new JMenuItem(new AbstractAction("Color") {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                doChooseColor(ev);
+            }
+        });
+        JMenuItem chooseBlackColor = new JMenuItem(new AbstractAction("BLACK") {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                doChooseColor(ev, Color.BLACK);
+            }
+        });
+        chooseBlackColor.setForeground(Color.BLACK);
+        JMenuItem chooseRedColor = new JMenuItem(new AbstractAction("RED") {
+            @Override
+            public void actionPerformed(ActionEvent ev) {
+                doChooseColor(ev, Color.RED);
+            }
+        });
+        chooseRedColor.setForeground(Color.RED);
+        JMenu borderMenu = new JMenu("Border");
+        borderMenu.add(borderItem);
+        borderMenu.addSeparator();
+        borderMenu.add(chooseColor);
+        borderMenu.add(chooseBlackColor);
+        borderMenu.add(chooseRedColor);
+        
         JMenuItem save = new JMenuItem(new AbstractAction("Save") {
             @Override
             public void actionPerformed(ActionEvent ev) {
@@ -128,7 +159,7 @@ class ImageDisplay extends JWindow {
         });
         
         popupMenu = new JPopupMenu();
-        popupMenu.add(borderItem);
+        popupMenu.add(borderMenu);
         popupMenu.add(save);
         popupMenu.add(copy);
         popupMenu.addSeparator();
@@ -203,6 +234,28 @@ class ImageDisplay extends JWindow {
     
     public int getImageWidth() {
         return catcher.getImage().getWidth();
+    }
+    
+    private void doChooseColor(ActionEvent ev) {
+        Color actual = borderColor;
+        final JColorChooser colorChooser = new JColorChooser(borderColor);
+        colorChooser.getSelectionModel().addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent ev) {
+                doChooseColor(null, colorChooser.getColor());
+            }
+        });
+        int opt = JOptionPane.showConfirmDialog(null, colorChooser, "Border Color", JOptionPane.OK_CANCEL_OPTION);
+        if (opt == JOptionPane.OK_OPTION) {
+            doChooseColor(ev, colorChooser.getColor());
+        } else {
+            doChooseColor(ev, actual);
+        }
+    }
+    
+    private void doChooseColor(ActionEvent ev, Color color) {
+        borderColor = color;
+        repaint();
     }
     
     private void doSave(ActionEvent ev) {
