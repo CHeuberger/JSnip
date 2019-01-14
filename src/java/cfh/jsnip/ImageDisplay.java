@@ -245,7 +245,14 @@ class ImageDisplay extends JWindow {
                 doChooseColor(null, colorChooser.getColor());
             }
         });
-        int opt = JOptionPane.showConfirmDialog(null, colorChooser, "Border Color", JOptionPane.OK_CANCEL_OPTION);
+        int opt;
+        boolean onTop = isAlwaysOnTop();
+        try {
+            setAlwaysOnTop(false);
+            opt = JOptionPane.showConfirmDialog(null, colorChooser, "Border Color", JOptionPane.OK_CANCEL_OPTION);
+        } finally {
+            setAlwaysOnTop(onTop);
+        }
         if (opt == JOptionPane.OK_OPTION) {
             doChooseColor(ev, colorChooser.getColor());
         } else {

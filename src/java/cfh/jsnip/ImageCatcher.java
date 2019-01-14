@@ -122,14 +122,19 @@ class ImageCatcher extends JWindow {
     }
     
     private boolean checkVersionPrior18() {
-        String version = System.getProperty("java.version");
-        Pattern pattern = Pattern.compile("(\\d++)(?:\\.(\\d++)(\\..*)?)?");
-        Matcher matcher = pattern.matcher(version);
-        if (matcher.matches()) {
-            int major = Integer.parseInt(matcher.group(1));
-            int minor = (matcher.groupCount()>1) ? Integer.parseInt(matcher.group(2)) : 0;
-            return (major < 1) || (major == 1 && minor < 8);
-        } else {
+        try {
+            String version = System.getProperty("java.version");
+            Pattern pattern = Pattern.compile("(\\d++)(?:\\.(\\d++)(\\..*)?)?");
+            Matcher matcher = pattern.matcher(version);
+            if (matcher.matches()) {
+                int major = Integer.parseInt(matcher.group(1));
+                int minor = (matcher.groupCount()>1 && matcher.group(2)!=null) ? Integer.parseInt(matcher.group(2)) : 0;
+                return (major < 1) || (major == 1 && minor < 8);
+            } else {
+                return false;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return false;
         }
     }
@@ -146,7 +151,6 @@ class ImageCatcher extends JWindow {
     }
 
     private void doMousePressed(MouseEvent ev) {
-//        System.out.println("pressed: " + ev);
         if (isButtonPressed(ev, 1)) {
             if (start == null) {
                 start = ev.getPoint();
@@ -176,7 +180,6 @@ class ImageCatcher extends JWindow {
     }
 
     private void doMouseReleased(MouseEvent ev) {
-//        System.out.println("released: " + ev);
         if (isButtonPressed(ev, 1)) {
             switch (change) {
                 case END: end.setLocation(ev.getPoint()); break;
@@ -190,7 +193,6 @@ class ImageCatcher extends JWindow {
     }
     
     private void doMouseDragged(MouseEvent ev) {
-//        System.out.println("dragged: " + ev);
         if (isButtonPressed(ev, 1)) {
             switch (change) {
                 case END: end.setLocation(ev.getPoint()); break;
@@ -204,7 +206,6 @@ class ImageCatcher extends JWindow {
     }
 
     private void doMouseClicked(MouseEvent ev) {
-//        System.out.println("clicked: " + ev);
         if (isButtonPressed(ev, 3)) {
             if (start != null) {
                 int x1 = min(start.x, end.x);
