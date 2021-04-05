@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 import javax.swing.JWindow;
 
 
-@SuppressWarnings("serial")
 class ImageCatcher extends JWindow {
     
     public static enum DiffMode { 
@@ -44,7 +43,7 @@ class ImageCatcher extends JWindow {
         String getName() {
             return name;
         }
-    };
+    }
 
     private final ImageCatcher original;
     
@@ -58,7 +57,7 @@ class ImageCatcher extends JWindow {
     private Point start;
     private Point end;
     
-    private enum Change { END, STARTX, STARTY, ENDX, ENDY };
+    private enum Change { END, STARTX, STARTY, ENDX, ENDY }
     private Change change = Change.END;
     
     private Rectangle rectangle;
@@ -187,6 +186,7 @@ class ImageCatcher extends JWindow {
                 case STARTY: start.y = ev.getPoint().y; break;
                 case ENDX: end.x = ev.getPoint().x; break;
                 case ENDY: end.y = ev.getPoint().y; break;
+                default: throw new IllegalArgumentException("unhandled value: " + change);
             }
             repaint();
         }
@@ -200,6 +200,7 @@ class ImageCatcher extends JWindow {
                 case STARTY: start.y = ev.getPoint().y; break;
                 case ENDX: end.x = ev.getPoint().x; break;
                 case ENDY: end.y = ev.getPoint().y; break;
+                default: throw new IllegalArgumentException("unhandled value: " + change);
             }
             repaint();
         }

@@ -3,5 +3,5 @@ Main-Class: cfh.jsnip.Snipper
 SplashScreen-Image: cfh/jsnip/splash.png
 Name: JSnip
 Implementation-Title: JSnip
-Implementation-Version: 0.2
-Implementation-Vendor: Carlos F Heuberger
+Implementation-Version: 0.9
+Implementation-Vendor: Carlos Heuberger

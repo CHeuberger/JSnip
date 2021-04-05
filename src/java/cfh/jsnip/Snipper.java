@@ -97,7 +97,7 @@ public class Snipper {
                     System.out.println("remove " + display);
                 }
             }
-        };
+        }
     };
 
 
@@ -283,15 +283,18 @@ public class Snipper {
                 + "<h2>Snip</h2>\n"
                 + "<tt>Right-click</tt> the tray icon for menu and select <tt>Snip</tt>;<br>\n"
                 + "or just <tt>left-click</tt> the tray icon to start a new snip.<p>\n"
-                + "<tt>Left-press</tt> and <tt>drag</tt> to select the screen region.<br>\n"
-                + "<tt>Left-press</tt> and <tt>drag</tt> again to adjust the region borders if needed.<p>\n"
-                + "<tt>right-click</tt> to complete the snip when ready; a window will be created with the screenshot.<br>\n"
+                + "Select region:<br/>"
+                + "Start: <tt>Left-press</tt> and <tt>drag</tt> to select the screen region.<br>\n"
+                + "Adjust: <tt>Left-press</tt> and <tt>drag</tt> borders to adjust the region if needed.<p>\n"
+                + "End: <tt>right-click</tt> to complete the snip when ready; a window will be created with the screenshot.<br>\n"
                 + "<h2>Screenshot Window</h2>\n"
-                + "<tt>Left-press</tt> and <tt>drag</tt> to move the image. <br>\n"
-                + "<tt>Right-click</tt> for menu.<br>\n";
-        if (!displays.isEmpty()) {
-            text += "<h2>Images</h2>\n"
-                + "<table border=\"1\">\n"
+                + "<tt>Left-press</tt> and <tt>drag</tt> to move the image.<br>\n"
+                + "<tt>Right-click</tt> for menu.<br>\n"
+                + "<h2>Images</h2>\n";
+        if (displays.isEmpty()) {
+            text += "Screenshot data will be displayed here, if some screenshot is open.\n";
+        } else {
+            text += "<table border=\"1\">\n"
                 + "<tr>\n"
                 + "  <th>ID</th>\n"
                 + "  <th>Current<br>Postion</th>\n"
