@@ -1,4 +1,6 @@
-# JSnip
+# JSnip 
+
+[![CodeQL](https://github.com/CHeuberger/JSnip/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/CHeuberger/JSnip/actions/workflows/codeql-analysis.yml)
 
 A~nother~ screenshot program.
 
