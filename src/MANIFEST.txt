@@ -1,7 +1,6 @@
 Manifest-Version: 1.0
 Main-Class: cfh.jsnip.Snipper
 SplashScreen-Image: cfh/jsnip/splash.png
-Name: JSnip
 Implementation-Title: JSnip
 Implementation-Version: 0.9
 Implementation-Vendor: Carlos Heuberger

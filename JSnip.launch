@@ -14,5 +14,5 @@
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="cfh.jsnip.Snipper"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="JSnip"/>
     <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-splash:cfh/jsnip/splash.png"/>
-    <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:JSnip/bin/classes}"/>
+    <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${workspace_loc:JSnip/build}"/>
 </launchConfiguration>
