@@ -1,6 +1,6 @@
-# JSnip 
+# JSnip
 
-[![CodeQL](https://github.com/CHeuberger/JSnip/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/CHeuberger/JSnip/actions/workflows/codeql-analysis.yml)
+[![Java CI](https://github.com/CHeuberger/JSnip/actions/workflows/ant.yml/badge.svg)](https://github.com/CHeuberger/JSnip/actions/workflows/ant.yml) [![CodeQL](https://github.com/CHeuberger/JSnip/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/CHeuberger/JSnip/actions/workflows/codeql-analysis.yml)
 
 A~nother~ screenshot program.
 
