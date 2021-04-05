@@ -18,7 +18,7 @@ It uses the `java.awt.Robot` class to generate to take the screenshot.
 
 Java Runtime Environment (JRE) or Java Development Kit (JDK) for Java 8 must be installed. Download the JAR file and start it (double click or `java -jar jsnip.jar`).
 
-An icon (<img src="src/java/cfh/jsnip/tray.png" alt="tray" style="zoom: 20%;" />) will be added to notification area of the taskbar. 
+An icon (<img src="src/resources/cfh/jsnip/tray.png" alt="tray" style="zoom: 20%;" />) will be added to notification area of the taskbar. 
 
 - `Left-Click` to take a screenshot
 - `Right-Click` for menu (including the Help)
