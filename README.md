@@ -6,9 +6,9 @@ A~nother~ screenshot program.
 
 This was developed based on the following use cases:
 
-- take and show multiple screenshots:
+- take and show multiple screenshots:<br/>
   Documents often have more than one reference to tables and pictures on different pages. This program allows taking screenshots of these and move them around as needed, without using any additional screen space like for title or toolbars.
-- take multiple screenshots of the same region:
+- take multiple screenshots of the same region:<br/>
   This allows to recapture a screenshot of the same screen region to help creating documentations. IMO it looks nicer if screenshots of the (same) GUI are of the same size and location.
 - fun: just wanted to develop it.
 
