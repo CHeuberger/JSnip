@@ -1,3 +1,7 @@
+/*
+ * Copyright: Carlos F. Heuberger. All rights reserved.
+ *
+ */
 package cfh.jsnip;
 
 import java.awt.Image;
@@ -8,6 +12,10 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
+/**
+ * @author Carlos F. Heuberger
+ *
+ */
 public class ImageSelection implements Transferable, ClipboardOwner {
     
     private static final DataFlavor[] flavors = {

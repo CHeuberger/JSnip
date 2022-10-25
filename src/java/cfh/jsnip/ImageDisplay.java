@@ -1,3 +1,7 @@
+/*
+ * Copyright: Carlos F. Heuberger. All rights reserved.
+ *
+ */
 package cfh.jsnip;
 
 import java.awt.AWTException;
@@ -37,7 +41,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import cfh.jsnip.ImageCatcher.DiffMode;
 
-
+/**
+ * @author Carlos F. Heuberger
+ *
+ */
 @SuppressWarnings("serial")
 class ImageDisplay extends JWindow {
     

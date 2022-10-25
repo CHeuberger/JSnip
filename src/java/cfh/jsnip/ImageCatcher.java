@@ -1,5 +1,13 @@
+/*
+ * Copyright: Carlos F. Heuberger. All rights reserved.
+ *
+ */
 package cfh.jsnip;
 
+/**
+ * @author Carlos F. Heuberger
+ *
+ */
 import static java.lang.Math.*;
 
 import java.awt.AWTException;
@@ -25,6 +33,7 @@ import java.util.regex.Pattern;
 import javax.swing.JWindow;
 
 
+@SuppressWarnings("serial")
 class ImageCatcher extends JWindow {
     
     public static enum DiffMode { 

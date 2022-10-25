@@ -1,6 +1,11 @@
+/*
+ * Copyright: Carlos F. Heuberger. All rights reserved.
+ *
+ */
 package cfh.jsnip;
 
-import java.awt.AWTEvent;
+import static java.awt.event.InputEvent.*;
+
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Color;
@@ -33,14 +38,25 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.Timer;
 
 
+/**
+ * @author Carlos F. Heuberger
+ *
+ */
 public class Snipper {
     
-    public static final String VERSION = "JSnip 0.9 by Carlos Heuberger";
+    public static final String VERSION = "JSnip 1.00 by Carlos Heuberger";
 
     private static final String ICON_FILE = "tray.png";
+    private static final String TIMER_FILE = "trayTimer.png";
     
+    private static final int ALL_MODIFIERS = ALT_DOWN_MASK 
+                                           | ALT_GRAPH_DOWN_MASK 
+                                           | CTRL_DOWN_MASK 
+                                           | SHIFT_DOWN_MASK;
+
     public static void main(String[] args) {
         Snipper main = new Snipper();
         main.init(args);
@@ -66,6 +82,8 @@ public class Snipper {
     private MenuItem quitMenuItem;
     
     private TrayIcon trayIcon;
+    private BufferedImage trayImage;
+    private BufferedImage trayTimerImage;
     
     private Color borderColor = Color.BLACK;
     
@@ -110,20 +128,37 @@ public class Snipper {
             return;
         }
         
-        URL url = getClass().getResource(ICON_FILE);
-        BufferedImage trayImage;
+        URL url;
+        url = getClass().getResource(ICON_FILE);
+        if (url == null) {
+            error(ICON_FILE + " not found!");
+            return;
+        }
         try {
             trayImage = ImageIO.read(url);
         } catch (IOException ex) {
-            error(ICON_FILE + " not found!", ex);
+            error(ICON_FILE + " cannot be read!", ex);
             return;
+        }
+        
+        url = getClass().getResource(TIMER_FILE);
+        if (url == null) {
+            error(TIMER_FILE + " not found!");
+            trayTimerImage = trayImage;
+        } else {
+            try {
+                trayTimerImage = ImageIO.read(getClass().getResource(TIMER_FILE));
+            } catch (IOException ex) {
+                error(TIMER_FILE + " cannot be read!", ex);
+                trayTimerImage = trayImage;
+            }
         }
         
         snipMenuItem = new MenuItem("Snip");
         snipMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ev) {
-                doSnip(ev);
+                doSnip(ev.getModifiers());
             }
         });
         
@@ -220,12 +255,30 @@ public class Snipper {
 
     private void doDefault(MouseEvent ev) {
         if (ev.getButton() == MouseEvent.BUTTON1) {
-            doSnip(ev);
+            doSnip(ev.getModifiersEx());
         }
     }
     
-    private void doSnip(AWTEvent ev) {
+    private void doSnip(int modifiers) {
         closeCatchers();
+        int delay;
+        switch (modifiers & ALL_MODIFIERS) {
+            case CTRL_DOWN_MASK: delay = 3_000; break;
+            case SHIFT_DOWN_MASK+CTRL_DOWN_MASK: delay = 10_000; break;
+            default: delay = -1;
+        }
+        if (delay > 0) {
+            trayIcon.setImage(trayTimerImage);
+            Timer timer = new Timer(delay, this::snip);
+            timer.setRepeats(false);
+            timer.start();
+        } else {
+            snip(null);
+        }
+    }
+    
+    private void snip(ActionEvent ignored) {
+        trayIcon.setImage(trayTimerImage);
         GraphicsEnvironment environment = GraphicsEnvironment.getLocalGraphicsEnvironment();
         for (GraphicsDevice device : environment.getScreenDevices()) {
             try {
@@ -281,8 +334,11 @@ public class Snipper {
                 + "<h1><center>" + VERSION + "</center></h1>\n"
                 + "<h1><center>Help</center></h1>\n"
                 + "<h2>Snip</h2>\n"
-                + "<tt>Right-click</tt> the tray icon for menu and select <tt>Snip</tt>;<br>\n"
-                + "or just <tt>left-click</tt> the tray icon to start a new snip.<p>\n"
+                + "<tt>Right-click</tt> the tray icon for menu and select <tt>Snip</tt>; or<br>\n"
+                + "<tt>left-click</tt> the tray icon to start a new snip.<p>\n"
+                + "additionally hold:<br/>\n"
+                + "<tt>CTRL</tt> to delay about 3 seconds, <br/>\n"
+                + "<tt>CTRL-SHIFT</tt> for 10 seconds delay<p>\n"
                 + "Select region:<br/>"
                 + "Start: <tt>Left-press</tt> and <tt>drag</tt> to select the screen region.<br>\n"
                 + "Adjust: <tt>Left-press</tt> and <tt>drag</tt> borders to adjust the region if needed.<p>\n"
@@ -376,6 +432,7 @@ public class Snipper {
             ic.dispose();
         }
         catchers.clear();
+        trayIcon.setImage(trayImage);
     }
     
     private void error(String message) {
